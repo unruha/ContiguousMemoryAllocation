@@ -5,6 +5,7 @@
 #include "tokenizer.h"
 
 #define MEMSIZE 80
+#define BYTE 1
 
 // maximum length of the command
 #define MAX_LINE 80
@@ -16,11 +17,27 @@ char* getCommand();
 void freeArgs();
 
 // allocates N bytes for process using one of the 3 allocation algorithms
-allocateMemory(char* name, int size, int algo);
+void allocateMemory(char* name, int size, int algo);
+
+// display contents of memory
+void showMemory(char** memory);
 
 int main()
 {
     int should_run = 1;
+
+    // string array holding the contents of the memory
+    char** memory = malloc(MEMSIZE * sizeof(char*));
+    for (int i = 0; i < MEMSIZE; i++)
+    {
+        memory[i] = malloc((BYTE + 1) * sizeof(char));
+    }
+
+    // initialize values of memory
+    for (int i = 0; i < MEMSIZE; i++)
+    {
+        memory[i] = ".";
+    }
 
     while(should_run)
     {
@@ -42,9 +59,25 @@ int main()
         if (strcmp(operation, "A") == 0)
         {
             char* name = args[1];
-            int size = args[2];
-            int algo = args[3];
-            allocateMemory(name, size, algo);
+            int size = atoi(args[2]);
+            char* algoType = args[3];
+            int algo = -1;
+            if (strcmp(algoType, "F") == 0)
+            {
+                allocateMemory(name, size, 1);
+            }
+            else if (strcmp(algoType, "B") == 0)
+            {
+                allocateMemory(name, size, 2);
+            }
+            else if (strcmp(algoType, "W") == 0)
+            {
+                allocateMemory(name, size, 3);
+            }
+            else
+            {
+                printf("Error: Invalid algorithm type\n");
+            }
         }
         else if (strcmp(operation, "F") == 0)
         {
@@ -52,7 +85,7 @@ int main()
         }
         else if (strcmp(operation, "S") == 0)
         {
-            printf("Show\n");
+            showMemory(memory);
         }
         else if (strcmp(operation, "R") == 0)
         {
@@ -64,7 +97,7 @@ int main()
         }
         else if (strcmp(operation, "E") == 0)
         {
-            printf("Exit\n");
+            exit(0);
         }
         else 
         {
@@ -83,6 +116,9 @@ int main()
 void allocateMemory(char* name, int size, int algo)
 {
     printf("Allocate\n");
+    printf("name: %s\n", name);
+    printf("size: %d\n", size);
+    printf("algo: %d\n", algo);
 
     // error check input
     if (size > 80)
@@ -95,8 +131,17 @@ void allocateMemory(char* name, int size, int algo)
         printf("Error: Invalid allocation algorithm type");
         return;
     }
-
     
+}
+
+// display contents of memory array
+void showMemory(char** memory)
+{
+    for (int i = 0; i < MEMSIZE; i++)
+    {
+        printf(memory[i]);
+    }
+    printf("\n");
 }
 
 void freeArgs(char* args[])
