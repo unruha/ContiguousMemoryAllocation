@@ -31,6 +31,9 @@ void worstFit(char** memory, char* name, int size);
 // compact memory block to the lower indexes
 void compactMemory(char** memory);
 
+// read commands from file
+void readFile(char* name);
+
 // free memory with given name
 void freeMemory(char** memory, char* name);
 
@@ -105,7 +108,8 @@ int main()
         }
         else if (strcmp(operation, "R") == 0)
         {
-            printf("Read\n");
+            char* fileName = args[1];
+            readFile(fileName);
         }
         else if (strcmp(operation, "C") == 0)
         {
@@ -452,6 +456,24 @@ void compactMemory(char** memory)
         }
     }
     
+}
+
+void readFile(char* name)
+{
+    FILE* filePointer;
+    int bufferLength = 255;
+    char buffer[bufferLength];
+
+    filePointer = fopen(name, "r");
+
+    while (fgets(buffer, bufferLength, filePointer))
+    {
+        // cut newline character off end of command
+        buffer[strcspn(buffer, "\n")] = 0;
+        printf("%s\n", buffer);
+    }
+
+    fclose(filePointer);
 }
 
 // display contents of memory array
