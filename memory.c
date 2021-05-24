@@ -13,6 +13,9 @@
 // gets the line entered by the user that is the command to be executed next
 char* getCommand();
 
+// chooses and runs the command
+void runCommand(char* command, char** memory);
+
 // free all values in arguments array
 void freeArgs();
 
@@ -32,7 +35,7 @@ void worstFit(char** memory, char* name, int size);
 void compactMemory(char** memory);
 
 // read commands from file
-void readFile(char* name);
+void readFile(char* name, char** memory);
 
 // free memory with given name
 void freeMemory(char** memory, char* name);
@@ -59,76 +62,80 @@ int main()
 
     while(should_run)
     {
-        printf("cma>");
-
         // get the command from the user
         char* command = getCommand();
 
-        // string array to store the arguments
-        char* args[MAX_LINE];
-
-        // tokenize the string and store individual arguments
-        tokenize(command, args);
-
-        // store the type of operation
-        char* operation = args[0];
-
-        // handle each operation type
-        if (strcmp(operation, "A") == 0)
-        {
-            char* name = args[1];
-            int size = atoi(args[2]);
-            char* algoType = args[3];
-            int algo = -1;
-            if (strcmp(algoType, "F") == 0)
-            {
-                allocateMemory(memory, name, size, 1);
-            }
-            else if (strcmp(algoType, "B") == 0)
-            {
-                allocateMemory(memory, name, size, 2);
-            }
-            else if (strcmp(algoType, "W") == 0)
-            {
-                allocateMemory(memory, name, size, 3);
-            }
-            else
-            {
-                printf("Error: Invalid algorithm type\n");
-            }
-        }
-        else if (strcmp(operation, "F") == 0)
-        {
-            char* name = args[1];
-            freeMemory(memory, name);
-        }
-        else if (strcmp(operation, "S") == 0)
-        {
-            showMemory(memory);
-        }
-        else if (strcmp(operation, "R") == 0)
-        {
-            char* fileName = args[1];
-            readFile(fileName);
-        }
-        else if (strcmp(operation, "C") == 0)
-        {
-            compactMemory(memory);
-        }
-        else if (strcmp(operation, "E") == 0)
-        {
-            exit(0);
-        }
-        else 
-        {
-            printf("Invalid Operation\n");
-        }
-
-        // set all values in args to NULL
-        freeArgs(args);
+        // run the command
+        runCommand(command, memory);
     }
     
     return 0;
+}
+
+// chooses and runs the command
+void runCommand(char* command, char** memory)
+{
+    // string array to store the arguments
+    char* args[MAX_LINE];
+
+    // tokenize the string and store individual arguments
+    tokenize(command, args);
+
+    // store the type of operation
+    char* operation = args[0];
+
+    // handle each operation type
+    if (strcmp(operation, "A") == 0)
+    {
+        char* name = args[1];
+        int size = atoi(args[2]);
+        char* algoType = args[3];
+        int algo = -1;
+        if (strcmp(algoType, "F") == 0)
+        {
+            allocateMemory(memory, name, size, 1);
+        }
+        else if (strcmp(algoType, "B") == 0)
+        {
+            allocateMemory(memory, name, size, 2);
+        }
+        else if (strcmp(algoType, "W") == 0)
+        {
+            allocateMemory(memory, name, size, 3);
+        }
+        else
+        {
+            printf("Error: Invalid algorithm type\n");
+        }
+    }
+    else if (strcmp(operation, "F") == 0)
+    {
+        char* name = args[1];
+        freeMemory(memory, name);
+    }
+    else if (strcmp(operation, "S") == 0)
+    {
+        showMemory(memory);
+    }
+    else if (strcmp(operation, "R") == 0)
+    {
+        char* fileName = args[1];
+        // readFile(fileName, memory);
+        printf("Read File command doesnt work correctly\n");
+    }
+    else if (strcmp(operation, "C") == 0)
+    {
+        compactMemory(memory);
+    }
+    else if (strcmp(operation, "E") == 0)
+    {
+        exit(0);
+    }
+    else 
+    {
+        printf("Invalid Operation\n");
+    }
+
 }
 
 // allocates N bytes for process using one of the 3 allocation algorithms
@@ -458,19 +465,19 @@ void compactMemory(char** memory)
     
 }
 
-void readFile(char* name)
+void readFile(char* name, char** memory)
 {
     FILE* filePointer;
-    int bufferLength = 255;
+    int bufferLength = 100;
     char buffer[bufferLength];
 
     filePointer = fopen(name, "r");
 
     while (fgets(buffer, bufferLength, filePointer))
     {
-        // cut newline character off end of command
-        buffer[strcspn(buffer, "\n")] = 0;
-        printf("%s\n", buffer);
+        printf("State of the memory:\n");
+        showMemory(memory);
+        runCommand(buffer, memory);
     }
 
     fclose(filePointer);
