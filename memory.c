@@ -228,12 +228,151 @@ void firstFit(char** memory, char* name, int size)
 
 void bestFit(char** memory, char* name, int size)
 {
+    // holds the starting location of an empty chunk of memory
+    int start = 0;
+
+    // holds the starting location of the current best starting location for allocation
+    int bestStart = -1;
+
+    // holds the current smallest length of contiguous memory that is allocatable by 'size'
+    int smallest = 9999;
+
+    // boolean holds whether or not we have searched the entire list
+    int finished = 0;
+
+    // find the starting location of the smallest free area of memory
+    // but still must be larger than 'size'
+    while (finished == 0)
+    {
+        // move the starting pointer until it lands on unallocated memory space
+        while (memory[start] != ".")
+        {
+            start++;
+            // error check for start pointer running off end of memory
+            if (start > MEMSIZE - 1)
+            {
+                finished = 1;
+                break;
+            }
+        }
+        if (start > MEMSIZE - 1)
+        {
+            break;
+        }
+        if (start + size > MEMSIZE)
+        {
+            finished = 1;
+            break;
+        }
+        int end = start;
+        int tempSize = 9999;
+        // move the end pointer until it reaches non empty memory to find the length of empty contiguous memory
+        while (memory[end] == ".")
+        {
+            end++;
+            // if we have ran off the end of the memory, we are done searching
+            if (end > MEMSIZE - 1)
+            {
+                finished = 1;
+                break;
+            }
+        }
+        tempSize = end - start;
+        if (tempSize < smallest && tempSize >= size)
+        {
+            smallest = tempSize;
+            bestStart = start;
+        }
+        start = end;
+    }
+
+    // determine whether allocatable memory block was found
+    if (bestStart != -1)
+    {
+        for (int i = bestStart; i < bestStart + size; i++)
+        {
+            memory[i] = name;
+        }
+    }
+    else
+    {
+        printf("Allocation Error: Not enough contiguous memory");
+    }
     
 }
 
 void worstFit(char** memory, char* name, int size)
 {
+    // holds the starting location of an empty chunk of memory
+    int start = 0;
 
+    // holds the starting location of the current best starting location for allocation
+    int bestStart = -1;
+
+    // holds the current smallest length of contiguous memory that is allocatable by 'size'
+    int largest = -1;
+
+    // boolean holds whether or not we have searched the entire list
+    int finished = 0;
+
+    // find the starting location of the smallest free area of memory
+    // but still must be larger than 'size'
+    while (finished == 0)
+    {
+        // move the starting pointer until it lands on unallocated memory space
+        while (memory[start] != ".")
+        {
+            start++;
+            // error check for start pointer running off end of memory
+            if (start > MEMSIZE - 1)
+            {
+                finished = 1;
+                break;
+            }
+        }
+        if (start > MEMSIZE - 1)
+        {
+            break;
+        }
+        if (start + size > MEMSIZE)
+        {
+            finished = 1;
+            break;
+        }
+        int end = start;
+        int tempSize = -1;
+        // move the end pointer until it reaches non empty memory to find the length of empty contiguous memory
+        while (memory[end] == ".")
+        {
+            end++;
+            // if we have ran off the end of the memory, we are done searching
+            if (end > MEMSIZE - 1)
+            {
+                finished = 1;
+                break;
+            }
+        }
+        tempSize = end - start;
+        if (tempSize > largest && tempSize >= size)
+        {
+            largest = tempSize;
+            bestStart = start;
+        }
+        start = end;
+    }
+
+    // determine whether allocatable memory block was found
+    if (bestStart != -1)
+    {
+        for (int i = bestStart; i < bestStart + size; i++)
+        {
+            memory[i] = name;
+        }
+    }
+    else
+    {
+        printf("Allocation Error: Not enough contiguous memory");
+    }
 }
 
 void freeMemory(char** memory, char* name)
