@@ -13,11 +13,23 @@
 // gets the line entered by the user that is the command to be executed next
 char* getCommand();
 
-// free all values in argumnts array
+// free all values in arguments array
 void freeArgs();
 
 // allocates N bytes for process using one of the 3 allocation algorithms
 void allocateMemory(char** memory, char* name, int size, int algo);
+
+// use first fit allocation algorithm
+void firstFit(char** memory, char* name, int size);
+
+// use best fit allocation algorithm
+void bestFit(char** memory, char* name, int size);
+
+// use worst fit allocation algorithm
+void worstFit(char** memory, char* name, int size);
+
+// free memory with given name
+void freeMemory(char** memory, char* name);
 
 // display contents of memory
 void showMemory(char** memory);
@@ -81,7 +93,8 @@ int main()
         }
         else if (strcmp(operation, "F") == 0)
         {
-            printf("Free\n");
+            char* name = args[1];
+            freeMemory(memory, name);
         }
         else if (strcmp(operation, "S") == 0)
         {
@@ -130,71 +143,106 @@ void allocateMemory(char** memory, char* name, int size, int algo)
     // handle first fit
     if (algo == 1)
     {
-        // boolean to determine whether we need to continue looking for allocation space
-        int foundSpace = 0;
-        // pointer to the start and end index of the allocation range
-        int start = 0;
-        int end = 0;
+        firstFit(memory, name, size);
+    }
+    else if (algo == 2)
+    {
+        bestFit(memory, name, size);
+    }
+    else if (algo == 3)
+    {
+        worstFit(memory, name, size);
+    }
+}
 
-        // search for allocatable space if we have not yet found it
-        while (foundSpace == 0)
+void firstFit(char** memory, char* name, int size)
+{
+    // boolean to determine whether we need to continue looking for allocation space
+    int foundSpace = 0;
+    // pointer to the start and end index of the allocation range
+    int start = 0;
+    int end = 0;
+
+    // search for allocatable space if we have not yet found it
+    while (foundSpace == 0)
+    {
+        // move the starting pointer until it lands on unallocated memory space
+        while (memory[start] != ".")
         {
-            // move the starting pointer until it lands on unallocated memory space
-            while (memory[start] != ".")
+            start++;
+            // error check for start pointer running off end of memory
+            if (start > MEMSIZE - 1)
             {
-                start++;
-                // error check for start pointer running off end of memory
-                if (start > MEMSIZE - 1)
-                {
-                    printf("Allocation Error: Start pointer ran off end of memory\n");
-                }
-            }
-
-            // check if there is enough memory remaining to do the allocation
-            if (start + size > MEMSIZE)
-            {
-                printf("Allocation Error: Not enough contiguous memory\n");
+                printf("Allocation Error: Start pointer ran off end of memory\n");
                 return;
-            }
-            
-            // pointer to the ending index of the allocation range
-            end = start;
-
-            foundSpace = 1;
-
-            // move the end pointer 'size' times or until it reaches non-empty memory
-            // reaching non-empty memory would mean that we cannot allocate in this range
-            for (int i = 0; i < size - 1; i++)
-            {
-                end++;
-                // error check for running off end of memory
-                if (end > MEMSIZE - 1)
-                {
-                    printf("Allocation Error: End pointer ran off end of memory\n");
-                    return;
-                }
-
-                if (memory[end] != ".")
-                {
-                    foundSpace = 0;
-                    break;
-                }
-            }
-            // if we found an allocatable space with the correct size, then stop
-            if (foundSpace == 1)
-            {
-                break;
-            }
-            else if (foundSpace == 0)
-            {
-                start = end;
             }
         }
 
-        // we have found allocatable space, so allocate the memory
-        for (int i = start; i <= end; i++)
+        // check if there is enough memory remaining to do the allocation
+        if (start + size > MEMSIZE)
         {
-            memory[i] = name;
+            printf("Allocation Error: Not enough contiguous memory\n");
+            return;
+        }
+        
+        // pointer to the ending index of the allocation range
+        end = start;
+
+        foundSpace = 1;
+
+        // move the end pointer 'size' times or until it reaches non-empty memory
+        // reaching non-empty memory would mean that we cannot allocate in this range
+        for (int i = 0; i < size - 1; i++)
+        {
+            end++;
+            // error check for running off end of memory
+            if (end > MEMSIZE - 1)
+            {
+                printf("Allocation Error: End pointer ran off end of memory\n");
+                return;
+            }
+
+            if (memory[end] != ".")
+            {
+                foundSpace = 0;
+                break;
+            }
+        }
+        // if we found an allocatable space with the correct size, then stop
+        if (foundSpace == 1)
+        {
+            break;
+        }
+        else if (foundSpace == 0)
+        {
+            start = end;
+        }
+    }
+
+    // we have found allocatable space, so allocate the memory
+    for (int i = start; i <= end; i++)
+    {
+        memory[i] = name;
+    }
+}
+
+void bestFit(char** memory, char* name, int size)
+{
+    
+}
+
+void worstFit(char** memory, char* name, int size)
+{
+
+}
+
+void freeMemory(char** memory, char* name)
+{
+    for (int i = 0; i < MEMSIZE; i++)
+    {
+        if (strcmp(memory[i], name) == 0)
+        {
+            memory[i] = ".";
         }
     }
 }
