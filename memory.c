@@ -17,7 +17,7 @@ char* getCommand();
 void freeArgs();
 
 // allocates N bytes for process using one of the 3 allocation algorithms
-void allocateMemory(char* name, int size, int algo);
+void allocateMemory(char** memory, char* name, int size, int algo);
 
 // display contents of memory
 void showMemory(char** memory);
@@ -64,15 +64,15 @@ int main()
             int algo = -1;
             if (strcmp(algoType, "F") == 0)
             {
-                allocateMemory(name, size, 1);
+                allocateMemory(memory, name, size, 1);
             }
             else if (strcmp(algoType, "B") == 0)
             {
-                allocateMemory(name, size, 2);
+                allocateMemory(memory, name, size, 2);
             }
             else if (strcmp(algoType, "W") == 0)
             {
-                allocateMemory(name, size, 3);
+                allocateMemory(memory, name, size, 3);
             }
             else
             {
@@ -113,25 +113,90 @@ int main()
 
 // allocates N bytes for process using one of the 3 allocation algorithms
 // algo: 1 = first-fit, 2 = best-fit, 3 = worst-fit
-void allocateMemory(char* name, int size, int algo)
+void allocateMemory(char** memory, char* name, int size, int algo)
 {
-    printf("Allocate\n");
-    printf("name: %s\n", name);
-    printf("size: %d\n", size);
-    printf("algo: %d\n", algo);
-
     // error check input
     if (size > 80)
     {
-        printf("Error: Cannot allocate more than 80 bytes");
+        printf("Error: Cannot allocate more than 80 bytes\n");
         return;
     }
     if (algo < 1 || algo > 3)
     {
-        printf("Error: Invalid allocation algorithm type");
+        printf("Error: Invalid allocation algorithm type\n");
         return;
     }
     
+    // handle first fit
+    if (algo == 1)
+    {
+        // boolean to determine whether we need to continue looking for allocation space
+        int foundSpace = 0;
+        // pointer to the start and end index of the allocation range
+        int start = 0;
+        int end = 0;
+
+        // search for allocatable space if we have not yet found it
+        while (foundSpace == 0)
+        {
+            // move the starting pointer until it lands on unallocated memory space
+            while (memory[start] != ".")
+            {
+                start++;
+                // error check for start pointer running off end of memory
+                if (start > MEMSIZE - 1)
+                {
+                    printf("Allocation Error: Start pointer ran off end of memory\n");
+                }
+            }
+
+            // check if there is enough memory remaining to do the allocation
+            if (start + size > MEMSIZE)
+            {
+                printf("Allocation Error: Not enough contiguous memory\n");
+                return;
+            }
+            
+            // pointer to the ending index of the allocation range
+            end = start;
+
+            foundSpace = 1;
+
+            // move the end pointer 'size' times or until it reaches non-empty memory
+            // reaching non-empty memory would mean that we cannot allocate in this range
+            for (int i = 0; i < size - 1; i++)
+            {
+                end++;
+                // error check for running off end of memory
+                if (end > MEMSIZE - 1)
+                {
+                    printf("Allocation Error: End pointer ran off end of memory\n");
+                    return;
+                }
+
+                if (memory[end] != ".")
+                {
+                    foundSpace = 0;
+                    break;
+                }
+            }
+            // if we found an allocatable space with the correct size, then stop
+            if (foundSpace == 1)
+            {
+                break;
+            }
+            else if (foundSpace == 0)
+            {
+                start = end;
+            }
+        }
+
+        // we have found allocatable space, so allocate the memory
+        for (int i = start; i <= end; i++)
+        {
+            memory[i] = name;
+        }
+    }
 }
 
 // display contents of memory array
