@@ -28,6 +28,9 @@ void bestFit(char** memory, char* name, int size);
 // use worst fit allocation algorithm
 void worstFit(char** memory, char* name, int size);
 
+// compact memory block to the lower indexes
+void compactMemory(char** memory);
+
 // free memory with given name
 void freeMemory(char** memory, char* name);
 
@@ -106,7 +109,7 @@ int main()
         }
         else if (strcmp(operation, "C") == 0)
         {
-            printf("Compact\n");
+            compactMemory(memory);
         }
         else if (strcmp(operation, "E") == 0)
         {
@@ -384,6 +387,71 @@ void freeMemory(char** memory, char* name)
             memory[i] = ".";
         }
     }
+}
+
+void compactMemory(char** memory)
+{
+    // holds the starting location of a sequence of free memory
+    int p1 = 0;
+
+    // holds the starting location of sequence of occupied memory to the right of free memory
+    int p2 = 0;
+
+    // boolean determines whether we are done compacting
+    int finished = 0;
+
+    while (finished == 0)
+    {
+        // move p1 to the first block of free memory
+        while (memory[p1] != ".")
+        {
+            p1++;
+            if (p1 > MEMSIZE - 1)
+            {
+                finished = 1;
+                break;
+            }
+        }
+        if (p1 > MEMSIZE - 1)
+        {
+            break;
+        }
+
+        p2 = p1;
+        // move p2 to the chunk of occupied memory to the right of p1
+        while (memory[p2] == ".")
+        {
+            p2++;
+            if (p2 > MEMSIZE - 1)
+            {
+                finished = 1;
+                break;
+            }
+        }
+        if (p2 > MEMSIZE - 1)
+        {
+            break;
+        }
+
+        while (memory[p1] == "." && memory[p2] != ".")
+        {
+            // swap the values of the memory at p1 and p2
+            char* temp = memory[p1];
+            memory[p1] = memory[p2];
+            memory[p2] = temp;
+
+            p1++;
+            p2++;
+
+            // check if p2 ran off the end
+            if (p2 > MEMSIZE - 1)
+            {
+                finished = 1;
+                break;
+            }
+        }
+    }
+    
 }
 
 // display contents of memory array
